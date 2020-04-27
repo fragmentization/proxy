@@ -1,33 +1,42 @@
 package proxy
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
+
+	"fmt"
+	"net/url"
+
+	"net/http/httputil"
+
+	"github.com/NuoMinMin/zaplog"
 )
 
-type ProxyHandler struct {
-	Host string
-	Port string
-}
-
-func (self *ProxyHandler) NewProxyHandler() error {
-	addr := strings.Join([]string{self.Host, ":", self.Port}, "")
-
-	fmt.Println(addr)
-
-	if err := http.ListenAndServe(addr, &ProxyHandler{}); err != nil {
-		return err
-	}
-}
+type ProxyHandler struct{}
 
 func (*ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
 
-}
+			zaplog.Infof("server err:", err.(error).Error())
 
-func copyHeader(duplicator http.Header, beDuplicator *http.Header) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.(error).Error()))
+			return
+		}
+	}()
 
-	for key, value := range duplicator {
-		beDuplicator.Set(key, value[0])
+	//chrome
+	if r.URL.Path == "/favicon.ico" {
+		return
 	}
+
+	requestUrl, err := url.Parse(LB.SelectByWeightRand().Addr)
+	fmt.Println(requestUrl)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(requestUrl)
+	proxy.ServeHTTP(w, r)
 }
