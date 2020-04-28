@@ -29,6 +29,7 @@ func (*ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	requestUrl, err := url.Parse(LB.SelectByWeightRand().Addr)
+	fmt.Println(requestUrl)
 
 	if err != nil {
 		fmt.Println(err.Error())

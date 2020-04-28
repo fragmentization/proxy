@@ -1,5 +1,3 @@
-module MiddleServer
+module github.com/NuoMinMin/proxy
 
-go 1.12
-
-require github.com/NuoMinMin/proxy v0.0.0-20200427170522-2f861450983d // indirect
+go 1.14

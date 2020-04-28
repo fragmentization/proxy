@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 )
@@ -38,11 +39,22 @@ func (this *HttpChecker) Check(timeout time.Duration) {
 }
 
 func (this *HttpChecker) fail(server *HttpServer) {
-	fmt.Println(server.Addr, "fail")
-	server.FailWeight += server.Weight * (1 / SumWeight)
+
+	//向下取整
+	newFailWeight := int(math.Floor(float64(server.Weight)) * (1 / server.FailFactor))
+	if newFailWeight == 0 {
+		newFailWeight = 1
+	}
+
+	fmt.Println(server.Addr, "fail", server.Weight, server.FailWeight)
+	server.FailWeight += newFailWeight
+
+	if server.FailWeight > server.Weight {
+		server.FailWeight = server.Weight
+	}
 }
 
 func (this *HttpChecker) success(server *HttpServer) {
-	fmt.Println(server.Addr, "success")
+	fmt.Println(server.Addr, "success", server.Weight, server.FailWeight)
 	server.FailWeight = 0
 }

@@ -17,6 +17,7 @@ type HttpServer struct {
 	Weight        int
 	CurrentWeight int
 	FailWeight    int
+	FailFactor    float64
 }
 
 type LoadBalance struct {
@@ -50,6 +51,7 @@ func NewHttpServer(addr string, weight int) *HttpServer {
 		Addr:          addr,
 		Weight:        weight,
 		CurrentWeight: 0,
+		FailFactor:    5,
 	}
 }
 
