@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"math/rand"
 	"sort"
 	"time"
@@ -17,6 +16,7 @@ type HttpServer struct {
 	Addr          string
 	Weight        int
 	CurrentWeight int
+	FailWeight    int
 }
 
 type LoadBalance struct {
@@ -63,22 +63,46 @@ func (this *LoadBalance) AddServer(server *HttpServer) {
 	this.Servers = append(this.Servers, server)
 }
 
+func (this *LoadBalance) getSumWeight() (sum int) {
+	for _, server := range LB.Servers {
+		newWeight := server.Weight - server.FailWeight
+		if newWeight > 0 {
+			sum = sum + newWeight
+		}
+	}
+	return
+}
+
 //平滑加权轮询
 func (this *LoadBalance) SelectByWeightRand() *HttpServer {
 	for _, server := range this.Servers {
-		server.CurrentWeight += server.Weight
+		server.CurrentWeight += (server.Weight - server.FailWeight)
 	}
 
 	sort.Sort(this.Servers)
 	maxWeightServer := this.Servers[0]
 
-	maxWeightServer.CurrentWeight -= SumWeight
+	maxWeightServer.CurrentWeight -= this.getSumWeight()
 
-	test := ""
-	for _, server := range this.Servers {
-		test += fmt.Sprintf("%d,", server.CurrentWeight)
-	}
-	fmt.Println(test)
+	go Heartbeat(LB.Servers)
+
+	//strCurrentWeight := ""
+	//for _, server := range this.Servers {
+	//	strCurrentWeight += fmt.Sprintf("%d,", server.CurrentWeight)
+	//}
 
 	return maxWeightServer
+}
+
+//heartbeat
+func Heartbeat(servers HttpServers) {
+	t := time.NewTicker(time.Second * 5)
+	httpCheck := NewHttpChecker(servers)
+	for {
+		select {
+		case <-t.C:
+			httpCheck.Check(time.Second * 2)
+
+		}
+	}
 }
