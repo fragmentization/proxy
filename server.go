@@ -7,8 +7,6 @@ import (
 	"net/url"
 
 	"net/http/httputil"
-
-	"github.com/NuoMinMin/zaplog"
 )
 
 type ProxyHandler struct{}
@@ -17,7 +15,7 @@ func (*ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 
-			zaplog.Infof("server err:", err.(error).Error())
+			fmt.Println("server err:", err.(error).Error())
 
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.(error).Error()))
