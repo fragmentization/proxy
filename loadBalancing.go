@@ -43,7 +43,7 @@ func init() {
 		}
 
 	}
-	go Heartbeat(LB.Servers)
+	go heartbeat(LB.Servers)
 
 }
 
@@ -96,7 +96,7 @@ func (this *LoadBalance) SelectByWeightRand() *HttpServer {
 }
 
 //heartbeat
-func Heartbeat(servers HttpServers) {
+func heartbeat(servers HttpServers) {
 	t := time.NewTicker(time.Second * 5)
 	httpCheck := NewHttpChecker(servers)
 	for {
