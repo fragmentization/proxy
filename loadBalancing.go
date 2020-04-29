@@ -31,8 +31,8 @@ var SumWeight int //the total weight
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	LB = NewLoadBalance()
-	LB.AddServer(NewHttpServer("http://127.0.0.1:9091", 2))
-	LB.AddServer(NewHttpServer("http://127.0.0.1:9092", 1))
+	LB.AddServer(NewHttpServer("http://127.0.0.1:9192", 2))
+	LB.AddServer(NewHttpServer("http://127.0.0.1:9193", 1))
 
 	for index, server := range LB.Servers {
 		if server.Weight > 0 {
@@ -43,6 +43,7 @@ func init() {
 		}
 
 	}
+	go Heartbeat(LB.Servers)
 
 }
 
@@ -85,8 +86,6 @@ func (this *LoadBalance) SelectByWeightRand() *HttpServer {
 	maxWeightServer := this.Servers[0]
 
 	maxWeightServer.CurrentWeight -= this.getSumWeight()
-
-	go Heartbeat(LB.Servers)
 
 	//strCurrentWeight := ""
 	//for _, server := range this.Servers {
