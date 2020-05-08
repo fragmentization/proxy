@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"math/rand"
 	"sort"
 	"time"
 )
@@ -24,17 +23,12 @@ type LoadBalance struct {
 	Servers HttpServers
 }
 
-var LB *LoadBalance
+//var GroupLoadBalance *LoadBalance
 var ServerIndices []int
 var SumWeight int //the total weight
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-	LB = NewLoadBalance()
-	LB.AddServer(NewHttpServer("http://127.0.0.1:9192", 2))
-	LB.AddServer(NewHttpServer("http://127.0.0.1:9193", 1))
-
-	for index, server := range LB.Servers {
+func (this *LoadBalance) WatchServers() {
+	for index, server := range this.Servers {
 		if server.Weight > 0 {
 			for i := 0; i < server.Weight; i++ {
 				ServerIndices = append(ServerIndices, index)
@@ -43,16 +37,15 @@ func init() {
 		}
 
 	}
-	go heartbeat(LB.Servers)
-
+	go heartbeat(this.Servers)
 }
 
-func NewHttpServer(addr string, weight int) *HttpServer {
+func NewHttpServer(addr string, weight int, failFactor float64) *HttpServer {
 	return &HttpServer{
 		Addr:          addr,
 		Weight:        weight,
 		CurrentWeight: 0,
-		FailFactor:    5,
+		FailFactor:    failFactor,
 	}
 }
 
@@ -67,7 +60,7 @@ func (this *LoadBalance) AddServer(server *HttpServer) {
 }
 
 func (this *LoadBalance) getSumWeight() (sum int) {
-	for _, server := range LB.Servers {
+	for _, server := range this.Servers {
 		newWeight := server.Weight - server.FailWeight
 		if newWeight > 0 {
 			sum = sum + newWeight
