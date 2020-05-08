@@ -21,8 +21,7 @@ func TestProxyHandler_ServeHTTP(t *testing.T) {
 	}
 }
 
-type ProxyHandler struct {
-}
+type ProxyHandler struct{}
 
 func (*ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
