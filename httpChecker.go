@@ -45,7 +45,6 @@ func (this *HttpChecker) fail(server *HttpServer) {
 		newFailWeight = 1
 	}
 
-	//fmt.Println(server.Addr, "fail", server.Weight, server.FailWeight)
 	server.FailWeight += newFailWeight
 
 	if server.FailWeight > server.Weight {
@@ -54,6 +53,5 @@ func (this *HttpChecker) fail(server *HttpServer) {
 }
 
 func (this *HttpChecker) success(server *HttpServer) {
-	//fmt.Println(server.Addr, "success", server.Weight, server.FailWeight)
 	server.FailWeight = 0
 }
