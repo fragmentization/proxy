@@ -53,5 +53,6 @@ func (this *HttpChecker) fail(server *HttpServer) {
 }
 
 func (this *HttpChecker) success(server *HttpServer) {
+
 	server.FailWeight = 0
 }
