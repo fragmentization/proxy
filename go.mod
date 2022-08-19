@@ -1,3 +1,3 @@
-module github.com/NuoMinMin/proxy
+module github.com/fragmentization/proxy
 
 go 1.14
